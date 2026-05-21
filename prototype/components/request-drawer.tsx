@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -10,7 +9,7 @@ import {
 import { SlaBadge } from "@/components/sla-badge";
 import { toast } from "sonner";
 import type { NotificationRecord, RequestRecord } from "@/lib/data";
-import { CURRENT_USER } from "@/lib/data";
+import { CURRENT_USER, hoursToSla, slaState } from "@/lib/data";
 import { useState } from "react";
 
 interface RequestDrawerProps {
@@ -26,6 +25,14 @@ const STATUS_LABEL: Record<RequestRecord["status"], string> = {
   in_progress: "In progress",
   blocked: "Blocked",
   resolved: "Resolved",
+};
+
+const STATUS_DOT: Record<RequestRecord["status"], string> = {
+  new: "bg-slate-400",
+  triage: "bg-sky-500",
+  in_progress: "bg-violet-500",
+  blocked: "bg-rose-500",
+  resolved: "bg-emerald-500",
 };
 
 const TIER_LABEL: Record<RequestRecord["customerTier"], string> = {
@@ -123,6 +130,8 @@ export function RequestDrawer({
   }
 
   const reversedTimeline = [...request.timeline].reverse();
+  const state = slaState(request.slaDueAt);
+  const hours = hoursToSla(request.slaDueAt);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -130,18 +139,16 @@ export function RequestDrawer({
         side="right"
         className="w-full overflow-y-auto sm:max-w-xl"
       >
-        <SheetHeader className="border-b border-slate-200 dark:border-slate-800">
+        <SheetHeader className="border-b border-black/[0.06] px-5 py-5">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-              {request.id}
-            </p>
-            <SlaBadge request={request} />
+            <span className="text-kicker">{request.id}</span>
+            <SlaBadge state={state} hours={hours} />
           </div>
-          <SheetTitle className="text-left text-base leading-snug">
+          <SheetTitle className="mt-2 text-left text-lg font-semibold leading-snug tracking-tight">
             {request.title}
           </SheetTitle>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-medium text-slate-700 dark:text-slate-200">
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">
               {request.customerName}
             </span>
             <span>·</span>
@@ -153,60 +160,103 @@ export function RequestDrawer({
           </div>
         </SheetHeader>
 
-        <div className="flex flex-col gap-6 px-4 pb-6">
-          <section>
+        <div className="flex flex-col gap-7 px-5 pb-8 pt-5">
+          {/* Notify — the hero action */}
+          <section
+            className="relative overflow-hidden rounded-2xl border p-5"
+            style={{
+              borderColor: "color-mix(in oklch, var(--brand) 18%, transparent)",
+              backgroundImage:
+                "linear-gradient(135deg, var(--brand-soft) 0%, oklch(0.985 0 0) 100%)",
+            }}
+          >
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Notify customer
-              </h3>
-              <span className="text-[11px] text-slate-400">
-                via WhatsApp · template: status_update
+              <span className="text-kicker">Close the loop</span>
+              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                via WhatsApp · status_update
               </span>
             </div>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              Send {request.customerName} the current status (
-              <span className="font-medium text-slate-900 dark:text-slate-100">
+            <p className="mt-2 text-sm text-foreground/85">
+              Send <span className="font-semibold">{request.customerName}</span>{" "}
+              the current status (
+              <span className="font-semibold">
                 {STATUS_LABEL[request.status]}
               </span>
               ) without leaving this screen.
             </p>
-            <div className="mt-3 flex items-center gap-3">
-              <Button
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                type="button"
                 onClick={handleNotify}
                 disabled={sending}
-                className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
+                className="brand-button inline-flex items-center gap-2"
               >
-                {sending ? "Sending…" : "Notify customer"}
-              </Button>
+                {sending ? (
+                  <>
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    Sending…
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="m13 6 6 6-6 6" />
+                    </svg>
+                    Notify customer
+                  </>
+                )}
+              </button>
               {request.notifications.length > 0 && (
-                <span className="text-xs text-slate-500">
-                  Last sent {formatRelative(
-                    request.notifications[request.notifications.length - 1].sentAt
+                <span className="text-xs text-muted-foreground">
+                  Last sent{" "}
+                  {formatRelative(
+                    request.notifications[request.notifications.length - 1]
+                      .sentAt
                   )}
                 </span>
               )}
             </div>
           </section>
 
+          {/* Timeline */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Status timeline
-            </h3>
-            <ol className="mt-3 space-y-3 border-l border-slate-200 pl-4 dark:border-slate-800">
-              {reversedTimeline.map((event) => (
+            <div className="flex items-center justify-between">
+              <span className="text-kicker">Status timeline</span>
+              <span className="text-[10px] text-muted-foreground">
+                {request.timeline.length} events · v{request.version}
+              </span>
+            </div>
+            <ol className="mt-3 space-y-3.5 border-l border-black/[0.08] pl-5">
+              {reversedTimeline.map((event, idx) => (
                 <li key={event.id} className="relative">
-                  <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-slate-400 ring-4 ring-white dark:bg-slate-500 dark:ring-slate-950" />
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                  <span
+                    className={`absolute -left-[26px] top-1.5 h-3 w-3 rounded-full ring-4 ring-white ${STATUS_DOT[event.toStatus]}`}
+                  />
+                  <p className="text-sm font-medium text-foreground">
                     {event.fromStatus
                       ? `${STATUS_LABEL[event.fromStatus]} → ${STATUS_LABEL[event.toStatus]}`
                       : `Created as ${STATUS_LABEL[event.toStatus]}`}
+                    {idx === 0 && (
+                      <span className="ml-2 rounded-full bg-black/[0.06] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Latest
+                      </span>
+                    )}
                   </p>
                   {event.note && (
-                    <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">
+                    <p className="mt-0.5 text-sm text-foreground/75">
                       {event.note}
                     </p>
                   )}
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
                     {event.actorName} · {formatRelative(event.at)}
                   </p>
                 </li>
@@ -216,9 +266,12 @@ export function RequestDrawer({
 
           {request.notifications.length > 0 && (
             <section>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Notification history
-              </h3>
+              <div className="flex items-center justify-between">
+                <span className="text-kicker">Notification history</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {request.notifications.length} sent
+                </span>
+              </div>
               <ul className="mt-3 space-y-2">
                 {request.notifications
                   .slice()
@@ -226,12 +279,53 @@ export function RequestDrawer({
                   .map((n) => (
                     <li
                       key={n.id}
-                      className="flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-3 py-2 text-xs dark:border-slate-800 dark:bg-slate-900"
+                      className="flex items-center justify-between rounded-xl border border-black/[0.06] bg-white px-3.5 py-2.5 text-xs"
                     >
-                      <span className="font-medium text-slate-700 dark:text-slate-200">
-                        {n.channel === "whatsapp" ? "WhatsApp" : "Email"} · sent at &ldquo;{STATUS_LABEL[n.statusAtSend]}&rdquo;
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="flex h-5 w-5 items-center justify-center rounded-md"
+                          style={{
+                            backgroundColor:
+                              n.channel === "whatsapp"
+                                ? "oklch(0.95 0.05 145)"
+                                : "var(--brand-soft)",
+                            color:
+                              n.channel === "whatsapp"
+                                ? "oklch(0.4 0.12 145)"
+                                : "var(--brand-ink)",
+                          }}
+                        >
+                          {n.channel === "whatsapp" ? (
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="h-3 w-3"
+                              aria-hidden="true"
+                            >
+                              <path d="M20 4.04A10.46 10.46 0 0 0 12.06 1C6.5 1 2 5.5 2 11.07c0 1.78.47 3.5 1.34 5.04L2 22l6.1-1.32A10.06 10.06 0 0 0 12.05 21h.01c5.56 0 10.06-4.5 10.06-10.07 0-2.69-1.04-5.22-2.13-6.89zm-7.94 15.3h-.01a8.36 8.36 0 0 1-4.27-1.18l-.31-.18-3.62.78.79-3.52-.2-.32a8.34 8.34 0 0 1-1.27-4.43c0-4.61 3.75-8.36 8.37-8.36 2.24 0 4.34.87 5.92 2.45a8.33 8.33 0 0 1 2.45 5.92c0 4.61-3.75 8.36-8.36 8.36zm4.6-6.27c-.25-.13-1.48-.73-1.71-.82-.23-.08-.4-.13-.56.13s-.65.82-.8.99c-.14.16-.29.18-.54.06a6.91 6.91 0 0 1-2.04-1.26 7.66 7.66 0 0 1-1.42-1.76c-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.43.13-.15.17-.25.25-.41.08-.16.04-.31-.02-.43-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43-.14 0-.31-.02-.48-.02-.16 0-.43.06-.66.31-.22.26-.86.84-.86 2.05 0 1.21.88 2.38 1.01 2.55.12.17 1.74 2.65 4.22 3.71.59.25 1.05.4 1.4.51.59.19 1.13.16 1.55.1.47-.07 1.48-.6 1.69-1.19.2-.59.2-1.09.14-1.19-.06-.1-.23-.16-.48-.29z" />
+                            </svg>
+                          ) : (
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              className="h-3 w-3"
+                              aria-hidden="true"
+                            >
+                              <rect x="3" y="5" width="18" height="14" rx="2" />
+                              <path d="m3 7 9 6 9-6" />
+                            </svg>
+                          )}
+                        </span>
+                        <span className="font-medium text-foreground">
+                          {n.channel === "whatsapp" ? "WhatsApp" : "Email"}
+                        </span>
+                        <span className="text-muted-foreground">
+                          at &ldquo;{STATUS_LABEL[n.statusAtSend]}&rdquo;
+                        </span>
                       </span>
-                      <span className="text-slate-500">
+                      <span className="text-muted-foreground">
                         {n.actorName} · {formatRelative(n.sentAt)}
                       </span>
                     </li>

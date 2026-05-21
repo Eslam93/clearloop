@@ -39,7 +39,6 @@ export default function DashboardPage() {
       filter === "open"
         ? requests.filter((r) => r.status !== "resolved")
         : requests.slice();
-    // Sort: breached first, then at-risk, then by hours-to-sla ascending.
     return filtered.sort((a, b) => {
       const sa = slaState(a.slaDueAt);
       const sb = slaState(b.slaDueAt);
@@ -69,30 +68,83 @@ export default function DashboardPage() {
     );
   }
 
+  const initials = CURRENT_USER.name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("");
+
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <main className="min-h-screen text-foreground">
       <Toaster richColors position="top-right" />
 
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
-        <div className="mx-auto flex max-w-5xl flex-col gap-1 px-6 py-5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Account Manager Console · Tenant {CURRENT_USER.tenantId.replace("tnt_", "")}
-          </p>
-          <h1 className="text-xl font-semibold">My requests</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Logged in as {CURRENT_USER.name}. Showing requests for customers you own.
-          </p>
+      <header className="border-b border-black/[0.06] bg-white/70 backdrop-blur-md">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--brand)] text-[var(--brand-foreground)] shadow-[0_8px_18px_-8px_oklch(0.5_0.13_200_/_0.5)]">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 12a9 9 0 1 1-3.5-7.1" />
+                <path d="M21 4v5h-5" />
+              </svg>
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-semibold tracking-tight">
+                ClearLoop
+              </span>
+              <span className="text-[11px] text-muted-foreground">
+                Account Manager Console
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="hidden items-center gap-1.5 rounded-full border border-black/[0.06] bg-white px-2.5 py-1 text-[11px] font-medium text-muted-foreground sm:inline-flex">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--sla-healthy)]" />
+              Tenant {CURRENT_USER.tenantId.replace("tnt_", "")}
+            </span>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--brand-soft)] text-[11px] font-semibold text-[var(--brand-ink)]">
+                {initials}
+              </div>
+              <div className="hidden flex-col text-right leading-tight sm:flex">
+                <span className="text-xs font-semibold">{CURRENT_USER.name}</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Account Manager
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
-      <section className="mx-auto max-w-5xl px-6 py-6">
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
-          <Counter label="Open" value={counts.open} tone="default" />
-          <Counter label="At risk" value={counts.atRisk} tone="amber" />
-          <Counter label="Breached" value={counts.breached} tone="red" />
+      <section className="mx-auto max-w-5xl px-6 pb-16 pt-10">
+        <div className="flex flex-col gap-1">
+          <span className="text-kicker">Today · {formatDateLabel()}</span>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            My requests
+          </h1>
+          <p className="max-w-xl text-sm text-muted-foreground">
+            Every open request from customers you own. Sorted by SLA risk so the
+            customer never asks first.
+          </p>
         </div>
 
-        <div className="mt-6 flex items-center gap-2">
+        <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Counter label="Open" value={counts.open} tone="brand" hint="active right now" />
+          <Counter label="At risk" value={counts.atRisk} tone="amber" hint="under 4h to SLA" />
+          <Counter label="Breached" value={counts.breached} tone="rose" hint="past SLA — escalate" />
+        </div>
+
+        <div className="mt-8 flex flex-wrap items-center gap-2">
           <FilterChip
             label="Open"
             count={requests.filter((r) => r.status !== "resolved").length}
@@ -105,12 +157,12 @@ export default function DashboardPage() {
             active={filter === "all"}
             onClick={() => setFilter("all")}
           />
-          <span className="ml-auto text-xs text-slate-500">
-            Sorted by SLA (breached → at-risk → healthy)
+          <span className="ml-auto text-[11px] uppercase tracking-wider text-muted-foreground">
+            Sorted: Breached → At risk → Healthy
           </span>
         </div>
 
-        <ul className="mt-4 flex flex-col gap-2">
+        <ul className="mt-4 flex flex-col gap-2.5">
           {visible.map((req) => (
             <li key={req.id}>
               <RequestRow request={req} onSelect={handleSelect} />
@@ -119,18 +171,28 @@ export default function DashboardPage() {
         </ul>
 
         {visible.length === 0 && (
-          <p className="mt-6 rounded border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 dark:border-slate-700">
-            No requests match the current filter.
-          </p>
+          <div className="mt-8 rounded-2xl border border-dashed border-black/10 p-10 text-center">
+            <p className="text-sm text-muted-foreground">
+              Nothing matches the current filter. Try switching to{" "}
+              <span className="font-medium text-foreground">All</span>.
+            </p>
+          </div>
         )}
 
-        <footer className="mt-12 border-t border-slate-200 pt-4 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-          Static demo. Notification channel is mocked (toast only). Tenant B data
-          exists in the dataset but is filtered out by{" "}
-          <code className="rounded bg-slate-100 px-1 py-px text-[11px] dark:bg-slate-900">
-            currentUser.tenant_id
-          </code>
-          .
+        <footer className="mt-14 rounded-2xl border border-black/[0.05] bg-white/60 px-5 py-4 text-xs text-muted-foreground backdrop-blur">
+          <p className="leading-relaxed">
+            <span className="font-semibold text-foreground">Static demo.</span>{" "}
+            Notification record is persisted server-side via{" "}
+            <code className="rounded bg-black/[0.05] px-1.5 py-0.5 font-mono text-[11px]">
+              POST /api/requests/[id]/notify
+            </code>
+            ; WhatsApp/email delivery is mocked. Tenant B exists in the dataset
+            but is filtered out by{" "}
+            <code className="rounded bg-black/[0.05] px-1.5 py-0.5 font-mono text-[11px]">
+              currentUser.tenant_id
+            </code>
+            .
+          </p>
         </footer>
       </section>
 
@@ -146,26 +208,51 @@ export default function DashboardPage() {
   );
 }
 
+function formatDateLabel(): string {
+  return new Date().toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+}
+
 interface CounterProps {
   label: string;
   value: number;
-  tone: "default" | "amber" | "red";
+  hint: string;
+  tone: "brand" | "amber" | "rose";
 }
 
-const TONE_CLASS: Record<CounterProps["tone"], string> = {
-  default: "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950",
-  amber:
-    "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30",
-  red: "border-rose-200 bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/30",
-};
+function Counter({ label, value, hint, tone }: CounterProps) {
+  const accents = {
+    brand: {
+      ring: "ring-[var(--brand)]/15",
+      bar: "bg-[var(--brand)]",
+      text: "text-[var(--brand-ink)]",
+    },
+    amber: {
+      ring: "ring-[var(--sla-risk)]/20",
+      bar: "bg-[var(--sla-risk)]",
+      text: "text-[var(--sla-risk-ink)]",
+    },
+    rose: {
+      ring: "ring-[var(--sla-breached)]/20",
+      bar: "bg-[var(--sla-breached)]",
+      text: "text-[var(--sla-breached-ink)]",
+    },
+  }[tone];
 
-function Counter({ label, value, tone }: CounterProps) {
   return (
-    <div className={`rounded-lg border p-4 ${TONE_CLASS[tone]}`}>
-      <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-        {label}
+    <div className={`surface-card relative overflow-hidden p-5 ring-1 ${accents.ring}`}>
+      <div className={`absolute inset-y-0 left-0 w-[3px] ${accents.bar}`} />
+      <div className="flex items-start justify-between">
+        <span className="text-kicker">{label}</span>
+        <span className={`h-2 w-2 rounded-full ${accents.bar}`} />
+      </div>
+      <p className={`mt-3 text-4xl font-semibold tabular-nums ${accents.text}`}>
+        {value}
       </p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
     </div>
   );
 }

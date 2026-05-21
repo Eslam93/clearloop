@@ -1,40 +1,63 @@
-import { Badge } from "@/components/ui/badge";
-import { hoursToSla, slaState, type RequestRecord } from "@/lib/data";
+import type { SlaState } from "@/lib/data";
 
 interface SlaBadgeProps {
-  request: Pick<RequestRecord, "slaDueAt">;
+  state: SlaState;
+  hours: number;
 }
 
-export function SlaBadge({ request }: SlaBadgeProps) {
-  const state = slaState(request.slaDueAt);
-  const hours = hoursToSla(request.slaDueAt);
-
+export function SlaBadge({ state, hours }: SlaBadgeProps) {
   if (state === "breached") {
-    const overdueHours = Math.abs(hours).toFixed(0);
     return (
-      <Badge variant="destructive" className="text-[11px] font-medium">
-        Breached · {overdueHours}h over
-      </Badge>
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+        style={{
+          backgroundColor: "var(--sla-breached-soft)",
+          borderColor: "color-mix(in oklch, var(--sla-breached) 30%, transparent)",
+          color: "var(--sla-breached-ink)",
+        }}
+      >
+        <span
+          className="h-1.5 w-1.5 rounded-full"
+          style={{ backgroundColor: "var(--sla-breached)" }}
+        />
+        Breached · {Math.abs(hours).toFixed(0)}h over
+      </span>
     );
   }
 
   if (state === "at_risk") {
     return (
-      <Badge
-        variant="outline"
-        className="border-amber-500/40 bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 text-[11px] font-medium"
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+        style={{
+          backgroundColor: "var(--sla-risk-soft)",
+          borderColor: "color-mix(in oklch, var(--sla-risk) 30%, transparent)",
+          color: "var(--sla-risk-ink)",
+        }}
       >
+        <span
+          className="h-1.5 w-1.5 animate-pulse rounded-full"
+          style={{ backgroundColor: "var(--sla-risk)" }}
+        />
         At risk · {hours.toFixed(1)}h left
-      </Badge>
+      </span>
     );
   }
 
   return (
-    <Badge
-      variant="outline"
-      className="border-emerald-500/40 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200 text-[11px] font-medium"
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+      style={{
+        backgroundColor: "var(--sla-healthy-soft)",
+        borderColor: "color-mix(in oklch, var(--sla-healthy) 25%, transparent)",
+        color: "var(--sla-healthy-ink)",
+      }}
     >
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ backgroundColor: "var(--sla-healthy)" }}
+      />
       On track · {hours.toFixed(0)}h left
-    </Badge>
+    </span>
   );
 }
