@@ -1,4 +1,8 @@
-# Product Engineer Take-Home — Submission
+# ClearLoop
+
+> Close the account-manager → customer information loop in one click.
+
+Submitted as a product-engineer take-home (3–4 hour sprint). The brief asks for one clickable screen, the supporting docs, and a build log; the README below is the 2-minute orientation.
 
 ## The problem
 
