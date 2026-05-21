@@ -12,7 +12,11 @@ A GCC/MENA SMB SaaS platform manages customer requests across internal teams, bu
 
 An internal request dashboard for account managers, with one-click **Notify customer** that closes the AM → engineer → customer information loop without context-switching.
 
-## How to run the prototype
+## How to use it
+
+**Live:** [clearloop-six.vercel.app](https://clearloop-six.vercel.app/)
+
+**Local:**
 
 ```bash
 cd prototype
@@ -20,7 +24,7 @@ pnpm install
 pnpm dev
 ```
 
-Then open `http://localhost:3000`. Click any row to open the detail drawer; click **Notify customer** to fire a `POST /api/requests/{id}/notify` and see the status update record persist.
+Then open `http://localhost:3000`. Either way: click any row to open the detail drawer, then click **Notify customer** to fire a `POST /api/requests/{id}/notify` and see the status update record persist.
 
 Built with Next.js 16 (App Router), TypeScript, Tailwind, shadcn/ui. No external services — the dataset is static (`prototype/lib/data.ts`) and the notification record lives in a server-side in-memory store. Reloading the page resets any notifications added during the session.
 
