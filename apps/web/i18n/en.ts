@@ -245,7 +245,8 @@ export const en = {
     changes: { one: "{count} change", other: "{count} changes" },
     noData: "Not enough history yet.",
     simulated: "Simulated history. Your own actions in this sandbox move these numbers.",
-    columns: { who: "Who", rate: "Ask-first", tell: "Time to tell", open: "Behind now" },
+    columns: { who: "Who", rate: "Ask-first", tell: "Time to tell", open: "Behind now", changes: "Changes", week: "Week" },
+    showTable: "Show as a table",
   },
   tour: {
     step1: "This customer is two updates behind. The SLA is fine, but they don't know what changed.",
@@ -294,6 +295,13 @@ export const en = {
         title: "A loop you can see close",
         body: "Delivered, read, or asked first. WhatsApp's 24-hour rule is built in, and every message is signed by a person, not a model.",
       },
+    },
+    diagram: {
+      engineering: "The team changes the status",
+      you: "You tell the customer",
+      customer: "They read it",
+      closed: "Loop closed",
+      label: "The update loop: the team changes a request, the account manager tells the customer, the customer reads it.",
     },
     claimsTitle: "Every claim has a test",
     claimsLead: "And the key tests are shown to fail when the guard they test is removed.",

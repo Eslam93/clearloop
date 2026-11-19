@@ -11,7 +11,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import pg from "pg";
 import type { TestProject } from "vitest/node";
-import { startLocalPostgres } from "../src/local";
+import { createDatabaseSql, startLocalPostgres } from "../src/local";
 import { migrate } from "../src/migrate";
 
 const APP_PASSWORD = "clearloop_app_test";
@@ -50,7 +50,7 @@ export default async function setup(project: TestProject) {
   const admin = new pg.Client({ connectionString: adminUrl });
   await admin.connect();
   await admin.query(`drop database if exists ${admin.escapeIdentifier(database)} with (force)`);
-  await admin.query(`create database ${admin.escapeIdentifier(database)}`);
+  await admin.query(createDatabaseSql(admin, database));
   await admin.end();
 
   const ownerUrl = withDatabase(adminUrl, database);

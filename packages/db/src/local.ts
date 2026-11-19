@@ -23,6 +23,11 @@ export interface StartOptions {
   password?: string;
 }
 
+/** CREATE DATABASE in UTF-8 whatever the cluster's default encoding is. */
+export function createDatabaseSql(client: pg.Client, name: string): string {
+  return `create database ${client.escapeIdentifier(name)} with encoding 'UTF8' lc_collate 'C' lc_ctype 'C' template template0`;
+}
+
 export async function startLocalPostgres(options: StartOptions): Promise<LocalPostgres> {
   const user = options.user ?? "postgres";
   const password = options.password ?? "postgres";
@@ -35,6 +40,9 @@ export async function startLocalPostgres(options: StartOptions): Promise<LocalPo
     user,
     password,
     persistent: options.persistent,
+    // UTF-8 always. On Windows initdb otherwise picks the system code page (WIN1252), which cannot
+    // store Arabic.
+    initdbFlags: ["--encoding=UTF8", "--locale=C"],
     onLog: () => {},
     onError: (message) => {
       const text = String(message);
@@ -63,7 +71,7 @@ export async function startLocalPostgres(options: StartOptions): Promise<LocalPo
     createDatabase: (name) =>
       admin(async (client) => {
         const found = await client.query("select 1 from pg_database where datname = $1", [name]);
-        if (found.rowCount === 0) await client.query(`create database ${client.escapeIdentifier(name)}`);
+        if (found.rowCount === 0) await client.query(createDatabaseSql(client, name));
       }),
     dropDatabase: (name) =>
       admin(async (client) => {

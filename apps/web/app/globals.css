@@ -43,6 +43,10 @@
   --sla-paused-soft: oklch(0.955 0.008 255);
   --sla-paused-ink: oklch(0.45 0.02 255);
 
+  /* Chart marks, validated with the dataviz validator against each mode's surface. */
+  --chart-debt: oklch(0.54 0.16 293);
+  --chart-track: oklch(0.93 0.035 293);
+
   --shadow-pane: 0 1px 2px oklch(0.2 0.01 255 / 0.05), 0 12px 32px -16px oklch(0.2 0.01 255 / 0.14);
   --radius: 0.625rem;
 
@@ -100,6 +104,9 @@
   --sla-paused-soft: oklch(0.28 0.012 255);
   --sla-paused-ink: oklch(0.82 0.015 255);
 
+  --chart-debt: oklch(0.66 0.15 293);
+  --chart-track: oklch(0.3 0.05 293);
+
   --shadow-pane: 0 1px 2px oklch(0 0 0 / 0.3), 0 16px 40px -20px oklch(0 0 0 / 0.6);
 }
 
@@ -132,6 +139,8 @@
   --color-paused: var(--sla-paused);
   --color-paused-soft: var(--sla-paused-soft);
   --color-paused-ink: var(--sla-paused-ink);
+  --color-chart-debt: var(--chart-debt);
+  --color-chart-track: var(--chart-track);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -190,37 +199,36 @@
   }
 }
 
-@layer components {
-  .kicker {
-    @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-fg-subtle;
+/* Shared pieces, as Tailwind 4 utilities so they compose with @apply and variants. */
+@utility kicker {
+  @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-fg-subtle;
+  &:lang(ar) {
+    @apply text-xs tracking-normal normal-case;
   }
-  :lang(ar) .kicker {
-    @apply tracking-normal normal-case text-xs;
-  }
-  .num {
-    font-variant-numeric: tabular-nums;
-  }
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55;
-  }
-  .btn-primary {
-    @apply btn bg-brand text-brand-fg hover:bg-brand-hover;
-  }
-  .btn-ghost {
-    @apply btn border border-line bg-panel text-fg hover:bg-sunken;
-  }
-  .btn-quiet {
-    @apply btn px-2.5 py-1.5 font-medium text-fg-muted hover:bg-sunken hover:text-fg;
-  }
-  .kbd {
-    @apply inline-flex min-w-[1.4em] items-center justify-center rounded border border-line-strong bg-sunken px-1 font-mono text-[10.5px] font-medium text-fg-muted;
-  }
-  .pane {
-    @apply rounded-xl border border-line bg-panel shadow-pane;
-  }
-  .flip-rtl {
-    @apply rtl:-scale-x-100;
-  }
+}
+@utility num {
+  font-variant-numeric: tabular-nums;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55;
+}
+@utility btn-primary {
+  @apply btn bg-brand text-brand-fg hover:bg-brand-hover;
+}
+@utility btn-ghost {
+  @apply btn border border-line bg-panel text-fg hover:bg-sunken;
+}
+@utility btn-quiet {
+  @apply btn px-2.5 py-1.5 font-medium text-fg-muted hover:bg-sunken hover:text-fg;
+}
+@utility kbd {
+  @apply inline-flex min-w-[1.4em] items-center justify-center rounded border border-line-strong bg-sunken px-1 font-mono text-[10.5px] font-medium text-fg-muted;
+}
+@utility pane {
+  @apply rounded-xl border border-line bg-panel shadow-pane;
+}
+@utility flip-rtl {
+  @apply rtl:-scale-x-100;
 }
 
 @media (prefers-reduced-motion: reduce) {
