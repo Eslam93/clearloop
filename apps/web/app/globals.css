@@ -1,0 +1,244 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * ClearLoop tokens. Two signals per request never share a color:
+ *   SLA (time):           breached red, at-risk amber, on-track green, paused slate
+ *   Debt (communication): violet, the "open loop" color
+ * Teal is the brand and the "closed loop" color.
+ */
+:root {
+  --bg: oklch(0.985 0.004 85);
+  --panel: oklch(1 0 0);
+  --sunken: oklch(0.966 0.005 85);
+  --line: oklch(0.915 0.006 85);
+  --line-strong: oklch(0.86 0.008 85);
+  --fg: oklch(0.21 0.012 255);
+  --fg-muted: oklch(0.46 0.012 255);
+  /* Small text on every surface clears WCAG AA (4.5:1): 4.78 on sunken, 5.05 on bg. */
+  --fg-subtle: oklch(0.53 0.012 255);
+
+  --brand: oklch(0.52 0.105 195);
+  --brand-hover: oklch(0.47 0.105 195);
+  --brand-fg: oklch(0.99 0 0);
+  --brand-soft: oklch(0.953 0.028 195);
+  --brand-ink: oklch(0.37 0.075 195);
+
+  --debt: oklch(0.54 0.16 293);
+  --debt-soft: oklch(0.955 0.03 293);
+  --debt-ink: oklch(0.43 0.15 293);
+
+  --sla-breached: oklch(0.58 0.19 25);
+  --sla-breached-soft: oklch(0.958 0.025 25);
+  --sla-breached-ink: oklch(0.45 0.16 25);
+  --sla-risk: oklch(0.73 0.15 68);
+  --sla-risk-soft: oklch(0.965 0.04 80);
+  --sla-risk-ink: oklch(0.47 0.12 60);
+  --sla-ok: oklch(0.63 0.13 155);
+  --sla-ok-soft: oklch(0.962 0.03 155);
+  --sla-ok-ink: oklch(0.42 0.09 155);
+  --sla-paused: oklch(0.62 0.025 255);
+  --sla-paused-soft: oklch(0.955 0.008 255);
+  --sla-paused-ink: oklch(0.45 0.02 255);
+
+  /* Chart marks, validated with the dataviz validator against each mode's surface. */
+  --chart-debt: oklch(0.54 0.16 293);
+  --chart-track: oklch(0.93 0.035 293);
+
+  --shadow-pane: 0 1px 2px oklch(0.2 0.01 255 / 0.05), 0 12px 32px -16px oklch(0.2 0.01 255 / 0.14);
+  --radius: 0.625rem;
+
+  /* shadcn/ui tokens, mapped onto ours */
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card: var(--panel);
+  --card-foreground: var(--fg);
+  --popover: var(--panel);
+  --popover-foreground: var(--fg);
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-fg);
+  --secondary: var(--sunken);
+  --secondary-foreground: var(--fg);
+  --muted: var(--sunken);
+  --muted-foreground: var(--fg-muted);
+  --accent: var(--sunken);
+  --accent-foreground: var(--fg);
+  --destructive: var(--sla-breached);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--brand);
+}
+
+.dark {
+  --bg: oklch(0.165 0.008 255);
+  --panel: oklch(0.205 0.009 255);
+  --sunken: oklch(0.185 0.008 255);
+  --line: oklch(0.29 0.01 255);
+  --line-strong: oklch(0.36 0.012 255);
+  --fg: oklch(0.94 0.005 255);
+  --fg-muted: oklch(0.72 0.01 255);
+  --fg-subtle: oklch(0.66 0.012 255);
+
+  --brand: oklch(0.72 0.105 195);
+  --brand-hover: oklch(0.77 0.1 195);
+  --brand-fg: oklch(0.17 0.02 195);
+  --brand-soft: oklch(0.3 0.045 195);
+  --brand-ink: oklch(0.85 0.07 195);
+
+  --debt: oklch(0.72 0.14 293);
+  --debt-soft: oklch(0.3 0.06 293);
+  --debt-ink: oklch(0.86 0.08 293);
+
+  --sla-breached: oklch(0.7 0.17 25);
+  --sla-breached-soft: oklch(0.3 0.06 25);
+  --sla-breached-ink: oklch(0.86 0.08 25);
+  --sla-risk: oklch(0.8 0.14 75);
+  --sla-risk-soft: oklch(0.32 0.06 75);
+  --sla-risk-ink: oklch(0.88 0.09 80);
+  --sla-ok: oklch(0.74 0.13 155);
+  --sla-ok-soft: oklch(0.3 0.05 155);
+  --sla-ok-ink: oklch(0.86 0.08 155);
+  --sla-paused: oklch(0.66 0.02 255);
+  --sla-paused-soft: oklch(0.28 0.012 255);
+  --sla-paused-ink: oklch(0.82 0.015 255);
+
+  --chart-debt: oklch(0.66 0.15 293);
+  --chart-track: oklch(0.3 0.05 293);
+
+  --shadow-pane: 0 1px 2px oklch(0 0 0 / 0.3), 0 16px 40px -20px oklch(0 0 0 / 0.6);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-sunken: var(--sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-ink: var(--brand-ink);
+  --color-debt: var(--debt);
+  --color-debt-soft: var(--debt-soft);
+  --color-debt-ink: var(--debt-ink);
+  --color-breached: var(--sla-breached);
+  --color-breached-soft: var(--sla-breached-soft);
+  --color-breached-ink: var(--sla-breached-ink);
+  --color-risk: var(--sla-risk);
+  --color-risk-soft: var(--sla-risk-soft);
+  --color-risk-ink: var(--sla-risk-ink);
+  --color-ok: var(--sla-ok);
+  --color-ok-soft: var(--sla-ok-soft);
+  --color-ok-ink: var(--sla-ok-ink);
+  --color-paused: var(--sla-paused);
+  --color-paused-soft: var(--sla-paused-soft);
+  --color-paused-ink: var(--sla-paused-ink);
+  --color-chart-debt: var(--chart-debt);
+  --color-chart-track: var(--chart-track);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-plex-sans), var(--font-plex-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-heading: var(--font-sans);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+
+  --shadow-pane: var(--shadow-pane);
+}
+
+@layer base {
+  * {
+    @apply border-line outline-brand/50;
+  }
+  html {
+    @apply font-sans antialiased;
+    font-feature-settings: "ss01", "ss02";
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-bg text-fg;
+  }
+  /* Arabic reads better a little larger and with more line height at the same size. */
+  :lang(ar) body {
+    font-size: 1.03rem;
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--brand) 25%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+}
+
+/* Shared pieces, as Tailwind 4 utilities so they compose with @apply and variants. */
+@utility kicker {
+  @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-fg-subtle;
+  &:lang(ar) {
+    @apply text-xs tracking-normal normal-case;
+  }
+}
+@utility num {
+  font-variant-numeric: tabular-nums;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55;
+}
+@utility btn-primary {
+  @apply btn bg-brand text-brand-fg hover:bg-brand-hover;
+}
+@utility btn-ghost {
+  @apply btn border border-line bg-panel text-fg hover:bg-sunken;
+}
+@utility btn-quiet {
+  @apply btn px-2.5 py-1.5 font-medium text-fg-muted hover:bg-sunken hover:text-fg;
+}
+@utility kbd {
+  @apply inline-flex min-w-[1.4em] items-center justify-center rounded border border-line-strong bg-sunken px-1 font-mono text-[10.5px] font-medium text-fg-muted;
+}
+@utility pane {
+  @apply rounded-xl border border-line bg-panel shadow-pane;
+}
+@utility flip-rtl {
+  @apply rtl:-scale-x-100;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

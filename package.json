@@ -1,0 +1,30 @@
+{
+  "name": "clearloop",
+  "private": true,
+  "description": "ClearLoop: your customer should never have to ask \"any update?\"",
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx scripts/dev.ts",
+    "build": "pnpm --filter @clearloop/web build",
+    "start": "tsx scripts/dev.ts start",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "check:workflows": "tsx scripts/check-workflows.ts",
+    "test:scripts": "tsx --test scripts/check-workflows.test.ts",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "check:bundle": "tsx scripts/check-bundle.ts",
+    "guards": "tsx scripts/guard-checks.ts"
+  },
+  "devDependencies": {
+    "@clearloop/db": "workspace:*",
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "6.0.3",
+    "yaml": "^2.9.1"
+  }
+}
