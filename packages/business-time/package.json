@@ -1,0 +1,21 @@
+{
+  "name": "@clearloop/business-time",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Business-hours SLA engine with GCC and Egypt calendars, Ramadan hours and Hijri holidays.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "fast-check": "^4.10.3",
+    "typescript": "6.0.3",
+    "vitest": "^5.1.1"
+  }
+}
