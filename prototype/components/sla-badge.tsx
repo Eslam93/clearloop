@@ -1,4 +1,4 @@
-import type { SlaState } from "@/lib/data";
+import type { SlaState } from "@/lib/types";
 
 interface SlaBadgeProps {
   state: SlaState;
