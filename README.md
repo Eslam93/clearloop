@@ -6,8 +6,6 @@ Built by **Eslam Hamed**, Technical Lead & AI Solutions Architect.
 
 [![CI](https://github.com/Eslam93/clearloop/actions/workflows/ci.yml/badge.svg)](https://github.com/Eslam93/clearloop/actions/workflows/ci.yml) ![License: MIT](https://img.shields.io/badge/license-MIT-teal)
 
-**Live demo:** [clearloop-six.vercel.app](https://clearloop-six.vercel.app). You get your own sandbox tenant; no sign-up.
-
 ![The console: an account manager's owed updates, with what the customer last heard next to what is actually true](docs/media/console-en-light.png)
 
 ## Run it
