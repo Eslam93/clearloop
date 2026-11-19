@@ -8,6 +8,26 @@ import pg from "pg";
 
 export const MIGRATIONS_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "migrations");
 
+/** Creates the database in a connection string if it does not exist yet, in UTF-8. */
+export async function ensureDatabase(ownerUrl: string): Promise<boolean> {
+  const target = new URL(ownerUrl);
+  const name = decodeURIComponent(target.pathname.slice(1));
+  const admin = new URL(ownerUrl);
+  admin.pathname = "/postgres";
+  const client = new pg.Client({ connectionString: admin.toString() });
+  await client.connect();
+  try {
+    const found = await client.query("select 1 from pg_database where datname = $1", [name]);
+    if (found.rowCount) return false;
+    await client.query(
+      `create database ${client.escapeIdentifier(name)} with encoding 'UTF8' lc_collate 'C' lc_ctype 'C' template template0`,
+    );
+    return true;
+  } finally {
+    await client.end();
+  }
+}
+
 export interface MigrateOptions {
   /** When set, the clearloop_app role is given LOGIN with this password. */
   appPassword?: string;
