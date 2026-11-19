@@ -24,7 +24,8 @@ test.describe("the console", () => {
   test("a change made in another window is caught before the customer is misinformed", async ({ context, page }) => {
     await newSandbox(page);
     await row(page, 1042).click();
-    await expect(page.getByTestId("send-update")).toBeVisible();
+    await page.keyboard.press("n"); // start an update: the composer keeps this version
+    await expect(page.getByTestId("send-update")).toBeFocused();
 
     // A second window on the same sandbox: an engineer moves the request while it is open here.
     const other = await context.newPage();
@@ -35,13 +36,26 @@ test.describe("the console", () => {
     });
     expect(moved.ok()).toBeTruthy();
 
-    await page.getByTestId("send-update").click();
+    // Back to the first window. Its stream paused while it was hidden and replays what it missed.
+    await page.bringToFront();
+    // The live stream brings the change here while the update is still unsent.
     // Next.js has its own role="alert" route announcer; take ours by its text.
     const alert = page.getByRole("alert").filter({ hasText: "changed while you were looking" });
-    await expect(alert).toContainText("This request changed while you were looking");
+    await expect(alert).toBeVisible();
     await expect(alert).toContainText("Khalid Othman");
     await expect(alert).toContainText("In progress");
     await expect(alert).toContainText("Blocked");
+
+    // Sending the message written for the old status is refused by the server (409).
+    await page.getByTestId("send-update").click();
+    await expect(alert).toBeVisible();
+    await expect(page.getByText(/^Sent to /)).toHaveCount(0);
+
+    // Reviewing adopts the new version; the preview (in Arabic, this customer's language) now says
+    // the request is on hold.
+    await alert.getByRole("button", { name: "Review the new message" }).click();
+    await expect(page.getByText("الطلب متوقف مؤقتاً")).toBeVisible();
+    await expect(alert).toHaveCount(0);
   });
 
   test("works without a mouse", async ({ page }) => {

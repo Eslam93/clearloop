@@ -20,9 +20,13 @@ interface Conflict {
   type: string | null;
 }
 
-export function Composer({ request: r }: { request: RequestView }) {
+export function Composer({ request: current }: { request: RequestView }) {
   const { t, language } = useT();
   const { data, call, refresh, composerFocus } = useConsole();
+  // The version the account manager is writing against. Live updates can move the request on;
+  // once they have started, their message stays as written until they choose to review.
+  const [snapshot, setSnapshot] = useState(current);
+  const [engaged, setEngaged] = useState(false);
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
   const [acknowledged, setAcknowledged] = useState<string[]>([]);
@@ -31,11 +35,15 @@ export function Composer({ request: r }: { request: RequestView }) {
   const [expanded, setExpanded] = useState(false);
   // Pressing `n` opens the composer: a newer focus request than the last one handled.
   const [handledFocus, setHandledFocus] = useState(composerFocus);
+  const working = engaged || note.trim().length > 0 || composerFocus > handledFocus;
+  // Not started yet: simply follow the latest version.
+  const r = working ? snapshot : current;
+  const stale = working && current.version !== snapshot.version;
   // One key per intent to send: a double-click or a retry of the same send reuses it.
   const key = useRef(newIdempotencyKey());
   const sendButton = useRef<HTMLButtonElement>(null);
 
-  const behind = r.debt.count > 0 || r.debt.customerAsked;
+  const behind = current.debt.count > 0 || current.debt.customerAsked;
   const open = behind || expanded || composerFocus > handledFocus;
   const channel = r.customer.channel;
   const rule = noteRule(channel, r.template, r.customer.lastInboundAt, data.now);
@@ -76,6 +84,25 @@ export function Composer({ request: r }: { request: RequestView }) {
     if (composerFocus > 0) requestAnimationFrame(() => sendButton.current?.focus());
   }, [composerFocus]);
 
+  const latestChange = [...current.timeline].reverse().find((e) => e.type === "status_changed" || e.type === "eta_set");
+  const shown: Conflict | null =
+    conflict ??
+    (stale && latestChange
+      ? {
+          by: latestChange.actorName,
+          from: latestChange.from ?? null,
+          to: latestChange.to ?? null,
+          at: new Date(latestChange.at).toISOString(),
+          type: latestChange.type,
+        }
+      : null);
+
+  function review() {
+    setSnapshot(current);
+    setConflict(null);
+    refresh();
+  }
+
   async function send(options: { allowRepeat?: boolean } = {}) {
     setSending(true);
     setConflict(null);
@@ -99,6 +126,8 @@ export function Composer({ request: r }: { request: RequestView }) {
         setDuplicate(null);
         setExpanded(false);
         setHandledFocus(composerFocus);
+        setEngaged(false);
+        setSnapshot(current);
       }
       key.current = newIdempotencyKey();
       refresh();
@@ -146,7 +175,12 @@ export function Composer({ request: r }: { request: RequestView }) {
   }
 
   return (
-    <section aria-labelledby="composer-title" data-tour="composer" className="rounded-xl border border-brand/25 bg-panel shadow-pane">
+    <section
+      aria-labelledby="composer-title"
+      data-tour="composer"
+      onFocusCapture={() => setEngaged(true)}
+      className="rounded-xl border border-brand/25 bg-panel shadow-pane"
+    >
       <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line px-4 py-3">
         <h3 id="composer-title" className="font-semibold">
           {t("composer.title", { customer: r.customer.name })}
@@ -160,26 +194,26 @@ export function Composer({ request: r }: { request: RequestView }) {
       </header>
 
       <div className="space-y-3 p-4">
-        {conflict && (
+        {shown && (
           <div role="alert" className="rounded-lg border border-risk/40 bg-risk-soft p-3 text-sm text-risk-ink">
             <p className="flex items-center gap-2 font-semibold">
               <RefreshCw className="size-4" aria-hidden="true" />
               {t("composer.conflict.title")}
             </p>
             <p className="mt-1">
-              {conflict.type === "status_changed" && conflict.from && conflict.to
+              {shown.type === "status_changed" && shown.from && shown.to
                 ? t("composer.conflict.body", {
-                    name: conflict.by ?? "",
-                    from: t(`status.${conflict.from}`),
-                    to: t(`status.${conflict.to}`),
-                    time: conflict.at ? relative(Date.parse(conflict.at), data.now, language) : "",
+                    name: shown.by ?? "",
+                    from: t(`status.${shown.from}`),
+                    to: t(`status.${shown.to}`),
+                    time: shown.at ? relative(Date.parse(shown.at), data.now, language) : "",
                   })
                 : t("composer.conflict.bodyEta", {
-                    name: conflict.by ?? "",
-                    time: conflict.at ? relative(Date.parse(conflict.at), data.now, language) : "",
+                    name: shown.by ?? "",
+                    time: shown.at ? relative(Date.parse(shown.at), data.now, language) : "",
                   })}
             </p>
-            <button type="button" className="btn-ghost mt-2.5" onClick={() => refresh()}>
+            <button type="button" className="btn-ghost mt-2.5" onClick={review}>
               {t("composer.conflict.review")}
             </button>
           </div>

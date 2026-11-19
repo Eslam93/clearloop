@@ -95,14 +95,24 @@ export function ConsoleProvider({
 
   // Live updates: any change in the tenant refreshes the server-rendered data.
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The last event this window has seen. The stream closes while the tab is hidden; reopening
+  // from here replays what changed in between, instead of starting from now and missing it.
+  const lastEventId = useRef<string>("");
   useEffect(() => {
     let source: EventSource | null = null;
     const open = () => {
       if (source || document.hidden) return;
-      source = new EventSource(`/api/stream?as=${encodeURIComponent(persona)}`);
-      source.addEventListener("change", () => {
+      const after = lastEventId.current ? `&after=${encodeURIComponent(lastEventId.current)}` : "";
+      source = new EventSource(`/api/stream?as=${encodeURIComponent(persona)}${after}`);
+      source.addEventListener("change", (event) => {
+        const id = (event as MessageEvent).lastEventId;
+        if (id) lastEventId.current = id;
         if (refreshTimer.current) clearTimeout(refreshTimer.current);
         refreshTimer.current = setTimeout(refresh, 120);
+      });
+      source.addEventListener("hello", (event) => {
+        const id = (event as MessageEvent).lastEventId;
+        if (id && !lastEventId.current) lastEventId.current = id;
       });
       source.addEventListener("presence", (event) => {
         try {

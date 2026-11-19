@@ -58,7 +58,7 @@ export function Detail({ request: r }: { request: RequestView }) {
       </header>
 
       <Knows request={r} />
-      <Composer key={`${r.id}:${r.version}`} request={r} />
+      <Composer key={r.id} request={r} />
       <Engineering request={r} />
       <Timeline request={r} />
 

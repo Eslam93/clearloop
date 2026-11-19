@@ -54,6 +54,7 @@ export async function GET(request: Request) {
       let last = Number.isFinite(resumeFrom) && resumeFrom > 0 ? resumeFrom : null;
       let presenceKey = "";
       let polls = 0;
+      let announced = false;
       const deadline = Date.now() + LIFETIME_MS;
       send("retry: 2000\n\n");
 
@@ -89,6 +90,15 @@ export async function GET(request: Request) {
             return { events, presence };
           });
 
+          // Tell the browser where this stream starts, so a later reconnect can resume from here.
+          if (!announced) {
+            send(`id: ${last}
+event: hello
+data: {}
+
+`);
+            announced = true;
+          }
           if (events.length > 0) {
             last = events.at(-1)!.id;
             send(`id: ${last}\nevent: change\ndata: ${JSON.stringify({ requests: [...new Set(events.map((e) => e.requestId))], types: [...new Set(events.map((e) => e.type))] })}\n\n`);
