@@ -41,6 +41,7 @@ Against the plan's "version to be proud of":
 - **The email adapter.** Designed, not built. The WhatsApp adapter is built and unit-tested, but not wired in: the demo has no credentials and no real phone numbers.
 - **The LLM review layer.** Not built, by decision ([0010](decisions/0010-no-model-writes-to-customers.md)).
 - **Publishing `@clearloop/business-time` to npm.** Not yet.
+- **Installing the agentic-methodology harness.** Not installed. Its hooks would have changed this session's own tooling partway through an unattended run. It installs in one command, whenever the owner wants it.
 - **Things only the owner can do.** The Vercel root directory, the Neon database, the custom domain, the portfolio page and a launch post ([`deploy.md`](deploy.md)).
 
 Built beyond the plan:
