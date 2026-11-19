@@ -59,7 +59,7 @@ export function TopBar() {
         <LanguageToggle className="hidden sm:inline-flex" />
         <ThemeToggle />
         <span
-          className="ms-1 flex size-8 items-center justify-center rounded-full bg-brand-soft text-xs font-semibold text-brand-ink"
+          className="ms-1 hidden size-8 items-center justify-center rounded-full bg-brand-soft text-xs font-semibold text-brand-ink sm:flex"
           title={`${t("common.signedAs")} ${data.actor.name}`}
         >
           {data.actor.name

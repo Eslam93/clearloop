@@ -20,8 +20,9 @@ interface Week {
 export function WeeklyChart({ weeks }: { weeks: Week[] }) {
   const { t, language } = useT();
   const [hover, setHover] = useState<number | null>(null);
-  const width = 520;
-  const height = 200;
+  // Close to the rendered width, so 11px text and the 24px bar cap stay true to size.
+  const width = 900;
+  const height = 240;
   const pad = { top: 22, bottom: 30, start: 40, end: 12 };
   const plotW = width - pad.start - pad.end;
   const plotH = height - pad.top - pad.bottom;

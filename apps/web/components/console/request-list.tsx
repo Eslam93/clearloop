@@ -88,10 +88,10 @@ function Row({
       }`}
     >
       {selected && <span className="absolute inset-y-0 start-0 w-[3px] bg-brand" aria-hidden="true" />}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <span className="truncate font-semibold">{r.customer.name}</span>
         <TierTag tier={r.customer.tier} />
-        <span className="ms-auto flex items-center gap-1.5">
+        <span className="ms-auto flex flex-wrap items-center gap-1.5">
           <DebtBadge debt={r.debt} compact />
           {r.status !== "resolved" && <SlaChip sla={r.sla} calendar={r.customer.calendarName} />}
         </span>

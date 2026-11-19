@@ -523,16 +523,19 @@ function historyPlans(at: (c: CustomerKey, day: number, time: string) => number,
     let t = at(customer, startDay, `${String(hour).padStart(2, "0")}:00`);
     const steps: Step[] = [{ kind: "created", at: t }];
     const by = engineers[Math.floor(rand() * engineers.length)]!;
+    // Each change is followed by its update before the next change, so no update is skipped.
     for (const to of ["triage", "in_progress", "resolved"] as const) {
       t += (2 + rand() * 20) * 3_600_000;
       if (t > anchor - DAY_MS) break;
       steps.push({ kind: "status", at: t, to, by });
       if (rand() < proactive) {
-        steps.push({ kind: "told", at: t + (0.3 + rand() * 5) * 3_600_000, by: am, read: rand() < 0.8 });
+        t += (0.3 + rand() * 5) * 3_600_000;
+        steps.push({ kind: "told", at: t, by: am, read: rand() < 0.8 });
       } else {
-        const asked = t + (2 + rand() * 18) * 3_600_000;
-        steps.push({ kind: "ping", at: asked, text: rand() < 0.5 ? "Any update?" : "هل من جديد؟" });
-        steps.push({ kind: "told", at: asked + (0.3 + rand() * 3) * 3_600_000, by: am, read: rand() < 0.8 });
+        t += (2 + rand() * 18) * 3_600_000;
+        steps.push({ kind: "ping", at: t, text: rand() < 0.5 ? "Any update?" : "هل من جديد؟" });
+        t += (0.3 + rand() * 3) * 3_600_000;
+        steps.push({ kind: "told", at: t, by: am, read: rand() < 0.8 });
       }
     }
     plans.push({

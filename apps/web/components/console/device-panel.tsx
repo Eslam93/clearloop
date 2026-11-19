@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, CheckCheck, Circle, Smartphone, TriangleAlert, WifiOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/i18n/client";
 import { relative } from "@/lib/view/format";
@@ -66,6 +66,11 @@ function Thread({ thread, offline }: { thread: PhoneThread; offline: boolean }) 
   const { data, call, refresh } = useConsole();
   const [reply, setReply] = useState("");
   const recent = thread.messages.slice(-12);
+  // Open at the newest message, like a phone does.
+  const listRef = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
+  }, [thread.customer.id, recent.length]);
   const quick = thread.customer.language === "ar" ? "هل من جديد؟" : "Any update?";
   async function read(id: string) {
     await call("/api/device/read", { notification_id: id }).catch(() => toast.error(t("errors.generic")));
@@ -92,7 +97,7 @@ function Thread({ thread, offline }: { thread: PhoneThread; offline: boolean }) 
           {t("device.offline")}
         </p>
       )}
-      <ol className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-sunken/30 px-3 py-3" aria-live="polite">
+      <ol ref={listRef} className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-sunken/30 px-3 py-3" aria-live="polite">
         {recent.length === 0 && <li className="py-8 text-center text-sm text-fg-subtle">{t("device.empty")}</li>}
         {recent.map((m) => {
           const out = m.direction === "out";

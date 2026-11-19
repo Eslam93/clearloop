@@ -42,8 +42,19 @@ export function Timeline({ request: r }: { request: RequestView }) {
                   </span>
                 )}
               </div>
-              {e.text && e.type === "note_added" && (
-                <p className={`mt-1 text-sm leading-relaxed ${e.visibility === "internal" ? "text-fg-muted" : "text-fg/85"}`}>{e.text}</p>
+              {e.text && (e.type === "note_added" || e.type === "customer_pinged") && (
+                <p
+                  dir="auto"
+                  className={`mt-1 text-sm leading-relaxed ${
+                    e.type === "customer_pinged"
+                      ? "rounded-lg bg-breached-soft/60 px-2.5 py-1.5 text-fg"
+                      : e.visibility === "internal"
+                        ? "text-fg-muted"
+                        : "text-fg/85"
+                  }`}
+                >
+                  {e.text}
+                </p>
               )}
               {n && (
                 <div className="mt-1.5 rounded-lg border border-line bg-sunken/60 p-2.5">
@@ -108,7 +119,7 @@ function label(e: TimelineItem, t: (key: string, vars?: Record<string, string | 
     case "eta_set":
       return e.eta ? t("detail.events.eta_set", { eta: new Date(e.eta).toLocaleString() }) : t("detail.events.eta_cleared");
     case "customer_pinged":
-      return t("detail.events.customer_pinged", { text: e.text ?? "" });
+      return t("debt.asked");
     case "update_sent":
       return e.channel === "out_of_band"
         ? t("detail.events.update_logged")

@@ -58,17 +58,24 @@ const STATUS_SENTENCE: Record<Language, Record<Status, string>> = {
   },
 };
 
+/**
+ * Unicode bidi isolates (FSI ... PDI) around text in the other script, so an English title inside
+ * an Arabic sentence (or an Arabic name inside an English one) keeps its own direction. Plain-text
+ * and safe for WhatsApp and email alike.
+ */
+export const isolate = (text: string) => `⁨${text}⁩`;
+
 const lines = (...parts: Array<string | null | false | undefined>) =>
   parts.filter((p): p is string => typeof p === "string" && p.trim().length > 0).join("\n");
 
 export function renderMessage(template: TemplateId, language: Language, input: TemplateInput): string {
   const note = input.note?.trim() || null;
   if (language === "ar") {
-    const ref = `طلبك رقم ${input.requestNumber}، «${input.requestTitle}»`;
+    const ref = `طلبك رقم ${input.requestNumber}، «${isolate(input.requestTitle)}»`;
     switch (template) {
       case "request_info":
         return lines(
-          `مرحباً ${input.contactName}،`,
+          `مرحباً ${isolate(input.contactName)}،`,
           `لنتابع العمل على ${ref}، نحتاج منك ما يلي:`,
           note,
           "أرسل لنا ردك هنا وسنتابع فوراً.",
@@ -76,7 +83,7 @@ export function renderMessage(template: TemplateId, language: Language, input: T
         );
       case "resolved":
         return lines(
-          `مرحباً ${input.contactName}،`,
+          `مرحباً ${isolate(input.contactName)}،`,
           `يسعدنا إبلاغك بأن ${ref} تم حله.`,
           note,
           "إن لاحظت أي مشكلة، أرسل لنا هنا.",
@@ -84,7 +91,7 @@ export function renderMessage(template: TemplateId, language: Language, input: T
         );
       default:
         return lines(
-          `مرحباً ${input.contactName}،`,
+          `مرحباً ${isolate(input.contactName)}،`,
           `تحديث بخصوص ${ref}:`,
           STATUS_SENTENCE.ar[input.status],
           input.eta && `الموعد المتوقع: ${input.eta}.`,
@@ -94,11 +101,11 @@ export function renderMessage(template: TemplateId, language: Language, input: T
     }
   }
 
-  const ref = `request #${input.requestNumber}, "${input.requestTitle}"`;
+  const ref = `request #${input.requestNumber}, "${isolate(input.requestTitle)}"`;
   switch (template) {
     case "request_info":
       return lines(
-        `Hi ${input.contactName},`,
+        `Hi ${isolate(input.contactName)},`,
         `To continue with your ${ref}, we need the following from you:`,
         note,
         "Reply here and we will pick it up straight away.",
@@ -106,7 +113,7 @@ export function renderMessage(template: TemplateId, language: Language, input: T
       );
     case "resolved":
       return lines(
-        `Hi ${input.contactName},`,
+        `Hi ${isolate(input.contactName)},`,
         `Good news: your ${ref} is resolved.`,
         note,
         "If anything looks off, reply here.",
@@ -114,7 +121,7 @@ export function renderMessage(template: TemplateId, language: Language, input: T
       );
     default:
       return lines(
-        `Hi ${input.contactName},`,
+        `Hi ${isolate(input.contactName)},`,
         `An update on your ${ref}:`,
         STATUS_SENTENCE.en[input.status],
         input.eta && `Expected by ${input.eta}.`,

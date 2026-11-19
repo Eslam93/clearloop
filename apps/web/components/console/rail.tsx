@@ -45,7 +45,7 @@ export function Rail() {
           ))}
         </div>
       )}
-      {RAIL_VIEWS.map((id, i) => {
+      {RAIL_VIEWS.map((id) => {
         const Icon = ICONS[id];
         const active = view === id;
         const highlight = id === "owed" && counts.owed > 0;
@@ -68,9 +68,6 @@ export function Rail() {
               }`}
             >
               {counts[id]}
-            </span>
-            <span className="kbd hidden opacity-0 transition-opacity group-hover:opacity-100 xl:inline-flex" aria-hidden="true">
-              {i + 1}
             </span>
           </button>
         );

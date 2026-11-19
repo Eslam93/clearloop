@@ -8,7 +8,7 @@ import { blocks, checkMessage, type Finding } from "@/lib/domain/presend";
 import { renderMessage, TEMPLATE_HAS_NOTE_SLOT, TEMPLATE_NEEDS_NOTE } from "@/lib/domain/templates";
 import { noteRule } from "@/lib/domain/window";
 import { ApiClientError, newIdempotencyKey } from "@/lib/view/api";
-import { dateTime, relative } from "@/lib/view/format";
+import { dateTime, duration, relative } from "@/lib/view/format";
 import type { RequestView } from "@/lib/view/types";
 import { useConsole } from "./context";
 
@@ -230,7 +230,7 @@ export function Composer({ request: r }: { request: RequestView }) {
             />
             <p className="mt-1 text-xs text-fg-subtle">
               {rule.windowClosesAt
-                ? t("composer.windowOpen", { time: relative(rule.windowClosesAt, data.now, language) })
+                ? t("composer.windowOpen", { time: duration(rule.windowClosesAt - data.now, language) })
                 : t("composer.noteHint")}
             </p>
           </div>

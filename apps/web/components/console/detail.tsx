@@ -30,7 +30,7 @@ export function Detail({ request: r }: { request: RequestView }) {
   return (
     <article aria-labelledby="detail-title" className="flex flex-col gap-5 p-5">
       <header>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-fg-subtle">
+        <div className="flex flex-wrap items-center gap-2 pe-8 text-xs text-fg-subtle xl:pe-0">
           <span className="num font-mono">#{r.number}</span>
           <span aria-hidden="true">·</span>
           <span>{t(`priority.${r.priority}`)}</span>
