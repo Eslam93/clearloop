@@ -37,15 +37,20 @@ export function TopBar() {
       </button>
 
       <div className="ms-auto flex items-center gap-0.5">
-        <button type="button" className="btn-quiet hidden md:inline-flex" onClick={() => setPanel("palette")} aria-label={t("shortcuts.palette")}>
+        <button type="button" className="btn-quiet hidden md:inline-flex" onClick={() => setPanel("palette")}>
           <Command className="size-4" aria-hidden="true" />
+          <span className="sr-only">{t("shortcuts.palette")}</span>
           <span className="text-xs text-fg-subtle">Ctrl K</span>
         </button>
-        <button type="button" className="btn-quiet relative" onClick={() => setPanel("phones")} aria-label={t("demo.phones")} data-tour="phones">
+        <button type="button" className="btn-quiet relative" onClick={() => setPanel("phones")} data-tour="phones">
           <Smartphone className="size-4" aria-hidden="true" />
-          <span className="hidden lg:inline">{t("demo.phones")}</span>
+          {/* The name comes from the content, so it always contains what is visible. */}
+          <span className="sr-only lg:not-sr-only">{t("demo.phones")}</span>
           {unreadPings > 0 && (
-            <span className="num absolute -end-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-breached text-[10px] font-bold text-white">
+            <span
+              className="num absolute -end-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-breached text-[10px] font-bold text-white"
+              aria-hidden="true"
+            >
               {unreadPings}
             </span>
           )}

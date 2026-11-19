@@ -12,7 +12,10 @@ import { ApiError } from "./http";
 import { newTenantId, seedSandbox } from "./seed";
 import { writeSession } from "./session";
 
-const SANDBOXES_PER_HOUR = 20;
+// Per visitor, per hour. Local runs and test suites create many sandboxes from one address.
+const SANDBOXES_PER_HOUR = Number(
+  process.env.SANDBOX_RATE_LIMIT ?? (process.env.NODE_ENV === "production" && !process.env.CLEARLOOP_LOCAL ? 20 : 1000),
+);
 const RIYADH = "Asia/Riyadh";
 
 /** A salted hash of the caller's address: enough to rate-limit, not enough to identify anyone. */

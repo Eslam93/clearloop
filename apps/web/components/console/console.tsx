@@ -32,6 +32,10 @@ const useWide = () =>
 
 function Shell() {
   const { t, dir } = useT();
+  // Lets end-to-end tests wait until key handlers are attached.
+  useEffect(() => {
+    document.documentElement.dataset.hydrated = "true";
+  }, []);
   const { selected, select, panel, setPanel } = useConsole();
   const wide = useWide();
   useKeyboard();

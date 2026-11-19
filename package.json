@@ -16,7 +16,9 @@
     "test": "pnpm -r --if-present test",
     "check:workflows": "tsx scripts/check-workflows.ts",
     "test:scripts": "tsx --test scripts/check-workflows.test.ts",
-    "db:migrate": "tsx scripts/migrate.ts"
+    "db:migrate": "tsx scripts/migrate.ts",
+    "check:bundle": "tsx scripts/check-bundle.ts",
+    "guards": "tsx scripts/guard-checks.ts"
   },
   "devDependencies": {
     "@clearloop/db": "workspace:*",

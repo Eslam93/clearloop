@@ -29,6 +29,26 @@ function withDatabase(url: string, database: string): string {
   return u.toString();
 }
 
+// Guard-removal checks (scripts/guard-checks.ts) set GUARD_BREAK to remove one guard on purpose;
+// the tests that claim it must then fail. Never set in a normal run.
+const BREAKS: Record<string, string> = {
+  disable_rls: "alter table requests disable row level security",
+  drop_append_only_trigger: "drop trigger request_events_append_only on request_events",
+  grant_event_update: "grant update, delete on request_events to clearloop_app",
+  uncovered_table: "create table leak (id int); grant select on leak to clearloop_app",
+};
+
+async function breakGuard(ownerUrl: string) {
+  const name = process.env.GUARD_BREAK;
+  if (!name) return;
+  const statement = BREAKS[name];
+  if (!statement) throw new Error(`unknown GUARD_BREAK ${name}`);
+  const client = new pg.Client({ connectionString: ownerUrl });
+  await client.connect();
+  await client.query(statement);
+  await client.end();
+}
+
 export default async function setup(project: TestProject) {
   const database = `clearloop_test_${process.pid}`;
   let adminUrl: string;
@@ -55,6 +75,7 @@ export default async function setup(project: TestProject) {
 
   const ownerUrl = withDatabase(adminUrl, database);
   await migrate(ownerUrl, { appPassword: APP_PASSWORD });
+  await breakGuard(ownerUrl);
 
   const app = new URL(ownerUrl);
   app.username = "clearloop_app";

@@ -22,7 +22,7 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
         document.cookie = `cl_lang=${next}; path=/; max-age=31536000; samesite=lax`;
         start(() => router.refresh());
       }}
-      aria-label={t("common.language")}
+      title={t("common.language")}
     >
       <Languages className="size-4" aria-hidden="true" />
       {next === "ar" ? t("common.switchToArabic") : t("common.switchToEnglish")}

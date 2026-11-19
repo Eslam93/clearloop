@@ -18,7 +18,8 @@
   --line-strong: oklch(0.86 0.008 85);
   --fg: oklch(0.21 0.012 255);
   --fg-muted: oklch(0.46 0.012 255);
-  --fg-subtle: oklch(0.6 0.01 255);
+  /* Small text on every surface clears WCAG AA (4.5:1): 4.78 on sunken, 5.05 on bg. */
+  --fg-subtle: oklch(0.53 0.012 255);
 
   --brand: oklch(0.52 0.105 195);
   --brand-hover: oklch(0.47 0.105 195);
@@ -79,7 +80,7 @@
   --line-strong: oklch(0.36 0.012 255);
   --fg: oklch(0.94 0.005 255);
   --fg-muted: oklch(0.72 0.01 255);
-  --fg-subtle: oklch(0.58 0.012 255);
+  --fg-subtle: oklch(0.66 0.012 255);
 
   --brand: oklch(0.72 0.105 195);
   --brand-hover: oklch(0.77 0.1 195);
