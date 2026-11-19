@@ -1,7 +1,7 @@
 # ClearLoop v2 plan
 
-Status: proposal for review, 2026-11-19. Nothing here is built yet.
-This is the spec for v2. It plays the same role `TAKEHOME_KICKOFF.md` played for v1.
+Status: approved with its defaults and built on 2026-11-19. Kept as written, as the spec v2 was built from. What changed during the build is in [`case-study.md`](case-study.md), [`v2-build-log.md`](v2-build-log.md) and [`decisions/`](decisions/).
+This was the spec for v2, in the same role `TAKEHOME_KICKOFF.md` played for v1.
 
 ## Summary
 

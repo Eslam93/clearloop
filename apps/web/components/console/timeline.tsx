@@ -10,7 +10,7 @@ import { useConsole } from "./context";
 const DELIVERY_ICON = { queued: Circle, sent: Check, delivered: CheckCheck, read: CheckCheck, failed: TriangleAlert, logged: Check };
 
 export function Timeline({ request: r }: { request: RequestView }) {
-  const { t, language } = useT();
+  const { t, plural, language } = useT();
   const { data } = useConsole();
   const untold = new Set(r.debt.untoldIds);
   // Delivery receipts are shown on the update they belong to, not as their own rows.
@@ -67,7 +67,7 @@ export function Timeline({ request: r }: { request: RequestView }) {
                       return <Icon className={`size-3.5 ${n.deliveryState === "read" ? "text-brand" : n.deliveryState === "failed" ? "text-breached" : ""}`} aria-hidden="true" />;
                     })()}
                     {t(`delivery.${n.deliveryState}`)}
-                    {n.deliveryState === "queued" && n.attempts > 0 && <span>· {t("detail.attempts", { count: n.attempts })}</span>}
+                    {n.deliveryState === "queued" && n.attempts > 0 && <span>· {plural("detail.attempts", n.attempts)}</span>}
                     {n.readAt && <span>· {relative(n.readAt, data.now, language)}</span>}
                   </p>
                 </div>

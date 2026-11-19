@@ -22,6 +22,8 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@clearloop/db", "@clearloop/business-time"],
   serverExternalPackages: ["pg"],
   poweredByHeader: false,
+  // The dev-tools badge would appear in screenshots and screen recordings of the demo.
+  devIndicators: false,
   async headers() {
     const headers = [
       { key: "X-Content-Type-Options", value: "nosniff" },

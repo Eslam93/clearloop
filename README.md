@@ -31,6 +31,10 @@ Then open http://localhost:3000 and click **Open the live demo**. `pnpm dev` sta
 
 The full walkthrough is in [`docs/demo-script.md`](docs/demo-script.md).
 
+| Arabic, dark | Customer phones | Insights |
+|---|---|---|
+| ![The console in Arabic, right to left, in dark mode](docs/media/console-ar-dark.png) | ![The customer phone simulator with Arabic messages and read receipts](docs/media/phones-en-light.png) | ![Insights: the ask-first rate, time to tell, and a weekly chart](docs/media/insights-en-light.png) |
+
 ## What it does
 
 - **Update debt.** An SLA asks whether we are slow. Debt asks whether the customer knows: the customer-visible changes they have not been told about. The **Owed updates** view is that list, ranked by who asked first, then by how long they have been in the dark.
@@ -112,7 +116,7 @@ Test counts on 2026-11-19:
 |---|---|
 | business-time (70 of them property tests) | 137 |
 | database: tenancy and schema | 28 |
-| web: domain and i18n | 27 |
+| web: domain, i18n, channels | 33 |
 | web: integration on Postgres | 12 |
 | end to end, including axe | 13 |
 | guard-removal checks | 10 |
@@ -136,7 +140,7 @@ The API is described by `GET /api/openapi.json`, generated from the same Zod sch
 ## Limits
 
 - **The demo has no real authentication.** A signed sandbox cookie and personas stand in. The data layer would not change with real auth; see [decision 0001](docs/decisions/0001-every-visitor-gets-their-own-tenant.md).
-- **No real messages are sent.** The WhatsApp Cloud API adapter is built but only runs with credentials, and the public deployment has none.
+- **No real messages are sent.** The WhatsApp Cloud API adapter is built and unit-tested but not wired in. The public deployment has no credentials, and the demo's customers have no real phone numbers.
 - **Retries need a viewer or a scheduler.** In the demo, retries run while a console is open, because Vercel Hobby cron runs daily ([decision 0008](docs/decisions/0008-the-sweeper-rides-on-the-stream-in-the-demo.md)).
 - **Holiday presets are defaults.** Official Hijri dates follow announcements and can differ by a day, so announced dates go in overrides.
 - **Insights run on simulated history.** The five weeks behind them are generated; your own actions in the sandbox move the numbers.
