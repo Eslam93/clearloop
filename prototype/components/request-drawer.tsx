@@ -8,12 +8,23 @@ import {
 } from "@/components/ui/sheet";
 import { SlaBadge } from "@/components/sla-badge";
 import { toast } from "sonner";
-import type { NotificationRecord, RequestRecord } from "@/lib/data";
-import { CURRENT_USER, hoursToSla, slaState } from "@/lib/data";
+import type {
+  CurrentUser,
+  NotificationRecord,
+  RequestRecord,
+} from "@/lib/types";
+import {
+  formatAbsolute,
+  formatRelative,
+  hoursToSla,
+  slaState,
+} from "@/lib/sla";
 import { useState } from "react";
 
 interface RequestDrawerProps {
   request: RequestRecord | null;
+  currentUser: CurrentUser;
+  nowIso: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onNotified: (requestId: string, notification: NotificationRecord) => void;
@@ -41,25 +52,10 @@ const TIER_LABEL: Record<RequestRecord["customerTier"], string> = {
   vip: "VIP",
 };
 
-function formatRelative(iso: string): string {
-  const ms = Date.now() - new Date(iso).getTime();
-  const hours = ms / (1000 * 60 * 60);
-  if (hours < 1) return `${Math.max(1, Math.round(hours * 60))}m ago`;
-  if (hours < 24) return `${Math.round(hours)}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
-}
-
-function formatAbsolute(iso: string): string {
-  return new Date(iso).toLocaleString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export function RequestDrawer({
   request,
+  currentUser,
+  nowIso,
   open,
   onOpenChange,
   onNotified,
@@ -87,7 +83,7 @@ export function RequestDrawer({
           template: "status_update",
           request_version: request.version,
           status_at_send: request.status,
-          actor_name: CURRENT_USER.name,
+          actor_name: currentUser.name,
         }),
       });
 
@@ -110,7 +106,7 @@ export function RequestDrawer({
         id: body.notification_id,
         channel: body.channel,
         statusAtSend: body.status_at_send,
-        actorName: CURRENT_USER.name,
+        actorName: currentUser.name,
         sentAt: body.sent_at,
       };
 
@@ -130,8 +126,8 @@ export function RequestDrawer({
   }
 
   const reversedTimeline = [...request.timeline].reverse();
-  const state = slaState(request.slaDueAt);
-  const hours = hoursToSla(request.slaDueAt);
+  const state = slaState(request.slaDueAt, nowIso);
+  const hours = hoursToSla(request.slaDueAt, nowIso);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -156,7 +152,7 @@ export function RequestDrawer({
             <span>·</span>
             <span>{request.assignedTeam} team</span>
             <span>·</span>
-            <span>Opened {formatRelative(request.createdAt)}</span>
+            <span>Opened {formatRelative(request.createdAt, nowIso)}</span>
           </div>
         </SheetHeader>
 
@@ -220,8 +216,7 @@ export function RequestDrawer({
                   Last sent{" "}
                   {formatRelative(
                     request.notifications[request.notifications.length - 1]
-                      .sentAt
-                  )}
+                      .sentAt, nowIso)}
                 </span>
               )}
             </div>
@@ -257,7 +252,7 @@ export function RequestDrawer({
                     </p>
                   )}
                   <p className="mt-0.5 text-[11px] text-muted-foreground">
-                    {event.actorName} · {formatRelative(event.at)}
+                    {event.actorName} · {formatRelative(event.at, nowIso)}
                   </p>
                 </li>
               ))}
@@ -326,7 +321,7 @@ export function RequestDrawer({
                         </span>
                       </span>
                       <span className="text-muted-foreground">
-                        {n.actorName} · {formatRelative(n.sentAt)}
+                        {n.actorName} · {formatRelative(n.sentAt, nowIso)}
                       </span>
                     </li>
                   ))}

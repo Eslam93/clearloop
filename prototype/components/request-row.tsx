@@ -2,14 +2,16 @@
 
 import { SlaBadge } from "@/components/sla-badge";
 import {
+  formatRelative,
   hoursToSla,
   lastNotifiedAt,
   slaState,
-  type RequestRecord,
-} from "@/lib/data";
+} from "@/lib/sla";
+import type { RequestRecord } from "@/lib/types";
 
 interface RequestRowProps {
   request: RequestRecord;
+  nowIso: string;
   onSelect: (id: string) => void;
 }
 
@@ -55,18 +57,14 @@ const TIER_CLASS: Record<RequestRecord["customerTier"], string> = {
   vip: "bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950",
 };
 
-function formatLastNotified(req: RequestRecord): string {
+function formatLastNotified(req: RequestRecord, nowIso: string): string {
   const at = lastNotifiedAt(req);
-  if (!at) return "Never";
-  const hours = (Date.now() - new Date(at).getTime()) / (1000 * 60 * 60);
-  if (hours < 1) return `${Math.max(1, Math.round(hours * 60))}m ago`;
-  if (hours < 24) return `${Math.round(hours)}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
+  return at ? formatRelative(at, nowIso) : "Never";
 }
 
-export function RequestRow({ request, onSelect }: RequestRowProps) {
-  const state = slaState(request.slaDueAt);
-  const hours = hoursToSla(request.slaDueAt);
+export function RequestRow({ request, nowIso, onSelect }: RequestRowProps) {
+  const state = slaState(request.slaDueAt, nowIso);
+  const hours = hoursToSla(request.slaDueAt, nowIso);
 
   const accentBar = {
     breached: "bg-[var(--sla-breached)]",
@@ -113,7 +111,7 @@ export function RequestRow({ request, onSelect }: RequestRowProps) {
             <span>·</span>
             <span>{request.assignedTeam} team</span>
             <span>·</span>
-            <span>Notified {formatLastNotified(request)}</span>
+            <span>Notified {formatLastNotified(request, nowIso)}</span>
             <span className="ml-auto hidden text-[10px] uppercase tracking-wider opacity-60 md:inline">
               {request.id}
             </span>
